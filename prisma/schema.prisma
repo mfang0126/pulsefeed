@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  passwordHash  String
+  displayName   String?
+  avatarUrl     String?
+  role          String    @default("reader") // reader, editor, admin
+  inviteCode    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  sessions      Session[]
+  readStatuses  ArticleRead[]
+  feedSubscriptions FeedSubscription[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Feed {
+  id              String    @id @default(cuid())
+  title           String
+  url             String    @unique
+  siteUrl         String?
+  faviconUrl      String?
+  description     String?
+  category        String    @default("general")
+  fetchFrequency  Int       @default(30) // minutes
+  lastFetchedAt   DateTime?
+  lastError       String?
+  errorCount      Int       @default(0)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  articles            Article[]
+  feedSubscriptions   FeedSubscription[]
+  fetchJobs           FetchJob[]
+}
+
+model Article {
+  id              String    @id @default(cuid())
+  feedId          String
+  guid            String
+  title           String
+  url             String
+  author          String?
+  publishedAt     DateTime
+  contentHtml     String?
+  contentText     String?
+  imageUrl        String?
+  
+  // AI-enriched fields
+  summary         String?   // TLDR summary
+  sentiment       String?   // positive, negative, neutral
+  tags            String?   // JSON array of tags
+  importance      Int       @default(0) // 0-100 score
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  feed            Feed      @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  readStatuses    ArticleRead[]
+
+  @@unique([feedId, guid])
+  @@index([publishedAt])
+  @@index([importance])
+}
+
+model ArticleRead {
+  id          String    @id @default(cuid())
+  userId      String
+  articleId   String
+  readAt      DateTime  @default(now())
+  isBookmarked Boolean  @default(false)
+  isHidden    Boolean   @default(false)
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article     Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+}
+
+model FeedSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  feedId    String
+  category  String   @default("general")
+  isPinned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feed      Feed     @relation(fields: [feedId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, feedId])
+}
+
+model FetchJob {
+  id        String    @id @default(cuid())
+  feedId    String
+  status    String    @default("pending") // pending, running, success, error
+  startedAt DateTime?
+  endedAt   DateTime?
+  error     String?
+  articlesNew Int     @default(0)
+  
+  feed      Feed      @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([startedAt])
+}

@@ -1,0 +1,45 @@
+{
+  "name": "pulsefeed",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "cron:fetch": "tsx scripts/fetch-feeds.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "next": "^15.3.2",
+    "next-auth": "^4.24.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "rss-parser": "^3.13.0",
+    "node-cron": "^3.0.3",
+    "bcryptjs": "^2.4.3",
+    "openai": "^4.97.0",
+    "lucide-react": "^0.507.0",
+    "date-fns": "^4.1.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.2.0",
+    "class-variance-authority": "^0.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.18",
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.5",
+    "@types/bcryptjs": "^2.4.6",
+    "prisma": "^6.8.2",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "tailwindcss": "^4.1.6",
+    "@tailwindcss/postcss": "^4.1.6",
+    "postcss": "^8.5.3",
+    "eslint": "^9.27.0",
+    "eslint-config-next": "^15.3.2"
+  }
+}
