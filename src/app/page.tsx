@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import Providers from './providers'
 
-export default function HomePage() {
+function LoginContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -53,7 +53,7 @@ export default function HomePage() {
         router.push('/dashboard')
         router.refresh()
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred')
     } finally {
       setLoading(false)
@@ -185,5 +185,13 @@ export default function HomePage() {
         PulseFeed — Open source RSS reader with AI superpowers
       </footer>
     </div>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <Providers>
+      <LoginContent />
+    </Providers>
   )
 }
